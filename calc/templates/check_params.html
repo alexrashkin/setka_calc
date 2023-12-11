@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор стоимости заказа</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 70vh;
+            margin: 0;
+            font-size: 1.2em;
+        }
+        #result {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Калькулятор стоимости заказа</h1>
+
+    <form id="paramsForm" method="post" action="{% url 'check_params' %}"
+        style="border: 1px solid #ccc; padding: 15px; border-radius: 10px; text-align: center;
+             display: flex; flex-direction: column; align-items: center;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button style="font-size: 18px; font-weight: bold; padding: 10px 20px;
+                   background-color: #66CDAA; color: black; margin-top: 10px; border: none;
+                   border-radius: 5px; cursor: pointer;"
+            type="button" onclick="checkParams()">Рассчитать стоимость заказа
+        </button>
+    </form>
+
+    <p id="result"></p>
+
+    <script>
+        function checkParams() {
+            var form = $('#paramsForm');
+            makeAjaxRequest(form);
+        }
+    
+        function makeAjaxRequest(form) {
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',  
+                data: form.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    var resultText = "Вес: " + data.result.weight + ", Общая стоимость: " + data.result.total_price;
+                    $("#result").text(resultText);
+                },
+                error: function (error) {
+                    var errorMessage = error.responseJSON ? error.responseJSON.error : 'Error executing the request.';
+                    console.log(errorMessage);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
